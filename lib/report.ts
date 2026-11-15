@@ -291,6 +291,7 @@ async function roastOne(manager: Manager): Promise<Manager> {
   }
   // With no key the writer returns a template without calling out, so the cap is not spent on it.
   if (!hasWriter()) {
+    console.warn(`[writer] template for entry ${manager.entry}: no GROQ_API_KEY or ANTHROPIC_API_KEY set`);
     return { ...manager, roast: templateRoast(manager.facts) };
   }
   const calls = await bumpCounter(claudeKey, CLAUDE_WINDOW_SECONDS);

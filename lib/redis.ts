@@ -20,7 +20,7 @@ export const CLAUDE_WINDOW_SECONDS = 24 * 60 * 60;
  * Bump REPORT_VERSION to throw away every cached report at once, e.g. after a writer fix.
  * Old keys are ignored and expire on their own within three days.
  */
-const REPORT_VERSION = 2;
+const REPORT_VERSION = 3;
 export const reportKey = (leagueId: number, gameweek: number) =>
   `league:${leagueId}:gw${gameweek}:v${REPORT_VERSION}`;
 export const lockKey = (leagueId: number) => `lock:league:${leagueId}`;

@@ -65,11 +65,18 @@ export async function writeRoast(manager: Manager, facts: Fact[]): Promise<strin
   try {
     const prompt = promptFor(manager, facts);
     const text = process.env.GROQ_API_KEY ? await askGroq(prompt) : await askClaude(prompt);
-    if (text === null) return fallback;
-    return checkRoast(text, manager, facts) === null ? text : fallback;
-  } catch {
-    return fallback;
+    if (text === null) return logFallback(manager, "no reply", fallback);
+    const problem = checkRoast(text, manager, facts);
+    return problem === null ? text : logFallback(manager, `failed check: ${problem}`, fallback);
+  } catch (error) {
+    return logFallback(manager, `error: ${error instanceof Error ? error.message : String(error)}`, fallback);
   }
+}
+
+/** One line in the server log per template fallback, so a broken key or model shows up in Vercel's logs. Entry id only, never names. */
+function logFallback(manager: Manager, reason: string, fallback: string): string {
+  console.warn(`[writer] template for entry ${manager.entry}: ${reason}`);
+  return fallback;
 }
 
 /** Claude's reply text, or null when it declined. */
@@ -119,7 +126,10 @@ async function askGroq(prompt: string): Promise<string | null> {
     }),
     signal: AbortSignal.timeout(GROQ_TIMEOUT_MS),
   });
-  if (!response.ok) return null;
+  if (!response.ok) {
+    console.warn(`[writer] groq ${response.status}: ${(await response.text()).slice(0, 200)}`);
+    return null;
+  }
   const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
   const text = data.choices?.[0]?.message?.content?.trim();
   return text ? text : null;

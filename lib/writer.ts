@@ -93,13 +93,14 @@ async function askClaude(prompt: string): Promise<string | null> {
 
 /** Groq's free tier, through its OpenAI-style chat endpoint. No SDK, just one fetch. */
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-/** Groq's large Llama model. The small ones break the word and number rules too often. */
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+/** Groq's largest open chat model. Groq retires models often: check console.groq.com/docs/models and override with GROQ_MODEL. */
+const GROQ_MODEL = "openai/gpt-oss-120b";
 /** Give up after this long and use the template, so one slow call never stalls a league. */
 const GROQ_TIMEOUT_MS = 15_000;
 
 /** Groq's reply text, or null when the call failed or came back empty. */
 async function askGroq(prompt: string): Promise<string | null> {
+  const model = process.env.GROQ_MODEL || GROQ_MODEL;
   const response = await fetch(GROQ_URL, {
     method: "POST",
     headers: {
@@ -107,7 +108,9 @@ async function askGroq(prompt: string): Promise<string | null> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.GROQ_MODEL || GROQ_MODEL,
+      model,
+      // gpt-oss thinks before answering; keep that short so the roast fits in MAX_TOKENS.
+      ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
       max_tokens: MAX_TOKENS,
       messages: [
         { role: "system", content: SYSTEM },

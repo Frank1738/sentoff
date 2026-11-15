@@ -66,6 +66,19 @@ body {
 }
 
 /*
+ * Tailwind 4 no longer gives buttons a pointer cursor, so every clickable gets one here.
+ * Links have it from the browser. A disabled button keeps the arrow, as it does nothing.
+ */
+@layer base {
+  button:not(:disabled),
+  [role="button"],
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+}
+
+/*
  * The night sky behind every page: two layers of faint stars and three soft glows, pinned
  * to the viewport so they do not scroll with the report. The stars are two small inline SVG
  * tiles, so nothing is downloaded. Turn the whole sky up or down with --sky (0 removes it).

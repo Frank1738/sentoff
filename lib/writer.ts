@@ -1,4 +1,4 @@
-// Claude + output checks (35 to 50 words, every number appears in the facts sent, no banned words, no links). Server side only.
+// Writes the roasts with Groq or Claude, then checks them (35 to 50 words, every number appears in the facts sent, no banned words, no links). Server side only.
 import Anthropic from "@anthropic-ai/sdk";
 import { templateRoast } from "./templates";
 import type { Fact, Manager } from "./types";
@@ -46,33 +46,80 @@ const SYSTEM = [
 ].join("\n");
 
 /**
- * Facts in, roast out. Any failure at all - no key, a bad call, output that fails a
- * check - returns the template line instead, so a league always gets a full set of cards.
+ * True when a roast can be written by a model: a Groq key or an Anthropic key is set.
+ * Without either, every roast is a template and the daily cap is never spent.
+ */
+export function hasWriter(): boolean {
+  return Boolean(process.env.GROQ_API_KEY || process.env.ANTHROPIC_API_KEY);
+}
+
+/**
+ * Facts in, roast out. Groq is used when its key is set, Claude otherwise. Any failure at
+ * all - no key, a bad call, output that fails a check - returns the template line instead,
+ * so a league always gets a full set of cards.
  */
 export async function writeRoast(manager: Manager, facts: Fact[]): Promise<string> {
   const fallback = templateRoast(facts);
-  if (!process.env.ANTHROPIC_API_KEY) return fallback;
+  if (!hasWriter()) return fallback;
 
   try {
-    const client = new Anthropic();
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      thinking: { type: "disabled" },
-      output_config: { effort: "low" },
-      system: SYSTEM,
-      messages: [{ role: "user", content: promptFor(manager, facts) }],
-    });
-    if (response.stop_reason === "refusal") return fallback;
-    const text = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join(" ")
-      .trim();
+    const prompt = promptFor(manager, facts);
+    const text = process.env.GROQ_API_KEY ? await askGroq(prompt) : await askClaude(prompt);
+    if (text === null) return fallback;
     return checkRoast(text, manager, facts) === null ? text : fallback;
   } catch {
     return fallback;
   }
+}
+
+/** Claude's reply text, or null when it declined. */
+async function askClaude(prompt: string): Promise<string | null> {
+  const client = new Anthropic();
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    thinking: { type: "disabled" },
+    output_config: { effort: "low" },
+    system: SYSTEM,
+    messages: [{ role: "user", content: prompt }],
+  });
+  if (response.stop_reason === "refusal") return null;
+  return response.content
+    .filter((block) => block.type === "text")
+    .map((block) => block.text)
+    .join(" ")
+    .trim();
+}
+
+/** Groq's free tier, through its OpenAI-style chat endpoint. No SDK, just one fetch. */
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+/** Groq's large Llama model. The small ones break the word and number rules too often. */
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+/** Give up after this long and use the template, so one slow call never stalls a league. */
+const GROQ_TIMEOUT_MS = 15_000;
+
+/** Groq's reply text, or null when the call failed or came back empty. */
+async function askGroq(prompt: string): Promise<string | null> {
+  const response = await fetch(GROQ_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: process.env.GROQ_MODEL || GROQ_MODEL,
+      max_tokens: MAX_TOKENS,
+      messages: [
+        { role: "system", content: SYSTEM },
+        { role: "user", content: prompt },
+      ],
+    }),
+    signal: AbortSignal.timeout(GROQ_TIMEOUT_MS),
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+  const text = data.choices?.[0]?.message?.content?.trim();
+  return text ? text : null;
 }
 
 /** The user message: the names in a marked block, then the facts as plain JSON. */

@@ -50,7 +50,7 @@ export default function LeagueForm({
         )}
         <Submit />
       </form>
-      <div className="enter-4 mt-auto flex flex-col gap-2.5 lg:mt-3.5 lg:gap-1.5">
+      <div className="enter-4 mt-6 flex flex-col gap-2.5 lg:mt-3.5 lg:gap-1.5">
         <Link
           href={`/league/${DEMO_LEAGUE}`}
           className="flex min-h-11 items-center self-start text-[15px] font-medium underline-offset-4"

@@ -149,8 +149,9 @@ let store: Store | null = null;
  */
 function backend(): Store {
   if (store) return store;
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Upstash's own names, or the KV_ names the Vercel Marketplace integration sets.
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   store = url && token ? upstashStore(url, token) : memoryStore();
   return store;
 }

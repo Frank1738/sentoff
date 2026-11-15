@@ -33,7 +33,7 @@ import type {
   PlayerSummary,
   Report,
 } from "./types";
-import { writeRoast } from "./writer";
+import { hasWriter, writeRoast } from "./writer";
 
 /** Cold builds everyone together may start in an hour, so our IP never looks like a scraper to FPL. */
 export const GLOBAL_BUILD_CAP = 60;
@@ -290,7 +290,7 @@ async function roastOne(manager: Manager): Promise<Manager> {
     return { ...manager, optedOut: true, roast: OPTED_OUT_ROAST };
   }
   // With no key the writer returns a template without calling out, so the cap is not spent on it.
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!hasWriter()) {
     return { ...manager, roast: templateRoast(manager.facts) };
   }
   const calls = await bumpCounter(claudeKey, CLAUDE_WINDOW_SECONDS);

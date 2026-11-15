@@ -1,5 +1,6 @@
 // Home: one input (league ID, FPL URL, or team ID). From 1024px wide the form sits in a left
-// column with two sample cards beside it, from board 05 of the design.
+// column with two sample cards beside it, from board 05 of the design. On phones the headline and form
+// sit as one block in the middle of the screen.
 import { Suspense } from "react";
 import { Logo } from "@/components/chrome";
 import LeagueForm from "@/components/league-form";
@@ -12,8 +13,8 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <div className="lg:absolute lg:top-8 lg:left-10">
         <Logo enter />
       </div>
-      <div className="flex flex-1 flex-col lg:flex-none">
-        <h1 className="enter-1 mt-[150px] font-display text-fluid-48 font-bold lg:mt-0 lg:text-[48px] lg:leading-[1.02] xl:text-[56px]">
+      <div className="flex flex-1 flex-col justify-center py-10 lg:flex-none lg:py-0">
+        <h1 className="enter-1 font-display text-fluid-48 font-bold lg:mt-0 lg:text-[48px] lg:leading-[1.02] xl:text-[56px]">
           Every manager in your mini-league, rated.
         </h1>
         <Suspense fallback={<LeagueForm action={go} />}>

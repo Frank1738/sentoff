@@ -17,12 +17,13 @@ export const GLOBAL_BUILD_WINDOW_SECONDS = 60 * 60;
 export const CLAUDE_WINDOW_SECONDS = 24 * 60 * 60;
 
 /**
- * Bump REPORT_VERSION to throw away every cached report at once, e.g. after a writer fix.
- * Old keys are ignored and expire on their own within three days.
+ * Reports are cached per deploy: Vercel sets the commit SHA, so every push starts a fresh cache and
+ * no league is served roasts written by older code. Old keys expire on their own within three days.
+ * Local dev has no SHA and uses "dev"; restarting the dev server already clears the in-memory cache.
  */
-const REPORT_VERSION = 3;
+const REPORT_VERSION = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "dev";
 export const reportKey = (leagueId: number, gameweek: number) =>
-  `league:${leagueId}:gw${gameweek}:v${REPORT_VERSION}`;
+  `league:${leagueId}:gw${gameweek}:${REPORT_VERSION}`;
 export const lockKey = (leagueId: number) => `lock:league:${leagueId}`;
 export const globalBuildKey = "rate:global:builds";
 export const claudeKey = "rate:global:claude";

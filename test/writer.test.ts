@@ -243,7 +243,7 @@ describe("writeRoast", () => {
 
 describe("the keys", () => {
   it("match the NOTES table", () => {
-    expect(reportKey(1500, 10)).toBe("league:1500:gw10:v3");
+    expect(reportKey(1500, 10)).toMatch(/^league:1500:gw10:[a-z0-9]+$/);
     expect(lockKey(1500)).toBe("lock:league:1500");
     expect(BLOCKLIST_KEY).toBe("blocklist");
   });

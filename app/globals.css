@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+/* The design tokens from design/README.md. One dark theme, no light mode. */
+@theme {
+  --color-bg: #0f1612;
+  --color-canvas: #0a0f0c;
+  --color-raised: #1d2922;
+  --color-text: #eeebe3;
+  --color-muted: #a3ada5;
+  --color-dim: #4e5850;
+  --color-line: #3a4a40;
+  --color-edge: #7a8a80;
+  --color-edge-light: #6e766f;
+  --color-red: #ff4b3e;
+  --color-yellow: #f5c518;
+
+  --radius-card: 3px;
+
+  /* Wider than the phone column: section rules stop at the text instead of running edge to edge. */
+  --breakpoint-wide: 431px;
+
+  /*
+   * Fluid display sizes. Each is the design size (the number in the name) from 480px wide
+   * up, and shrinks in a straight line to 70% of it at 320px, so a long league or manager
+   * name on a small phone does not run to four lines. Each value is
+   * clamp(0.7 * size, 0.1 * size + size * 18.75vw / 100, size).
+   */
+  --text-fluid-72: clamp(50.4px, 7.2px + 13.5vw, 72px);
+  --text-fluid-72--line-height: 0.9;
+  --text-fluid-48: clamp(33.6px, 4.8px + 9vw, 48px);
+  --text-fluid-48--line-height: 1.02;
+  --text-fluid-46: clamp(32.2px, 4.6px + 8.625vw, 46px);
+  --text-fluid-46--line-height: 1;
+  --text-fluid-40: clamp(28px, 4px + 7.5vw, 40px);
+  --text-fluid-40--line-height: 1;
+  --text-fluid-38: clamp(26.6px, 3.8px + 7.125vw, 38px);
+  --text-fluid-38--line-height: 1.05;
+  --text-fluid-36: clamp(25.2px, 3.6px + 6.75vw, 36px);
+  --text-fluid-36--line-height: 1;
+  --text-fluid-30: clamp(21px, 3px + 5.625vw, 30px);
+  --text-fluid-30--line-height: 1.05;
+  --text-fluid-27: clamp(18.9px, 2.7px + 5.0625vw, 27px);
+  --text-fluid-27--line-height: 1.22;
+  --text-fluid-26: clamp(18.2px, 2.6px + 4.875vw, 26px);
+  --text-fluid-26--line-height: 1;
+  --text-fluid-24: clamp(16.8px, 2.4px + 4.5vw, 24px);
+  --text-fluid-24--line-height: 1.1;
+
+  /* Labels and section headings only drop to 16px, so they stay above the 15px body text. */
+  --text-fluid-18: clamp(16px, 12px + 1.25vw, 18px);
+  --text-fluid-17: clamp(16px, 14px + 0.625vw, 17px);
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-zilla), Georgia, serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/*
+ * The night sky behind every page: two layers of faint stars and three soft glows, pinned
+ * to the viewport so they do not scroll with the report. The stars are two small inline SVG
+ * tiles, so nothing is downloaded. Turn the whole sky up or down with --sky (0 removes it).
+ * This relies on html having no background of its own, so body's colour is painted on the
+ * canvas underneath this layer.
+ */
+:root {
+  --sky: 1;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--sky);
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420' fill='%23eeebe3'><circle cx='0.0' cy='386.7' r='0.62' opacity='0.37'/><circle cx='306.3' cy='223.7' r='0.63' opacity='0.66'/><circle cx='317.1' cy='228.0' r='0.77' opacity='0.60'/><circle cx='343.0' cy='101.6' r='0.65' opacity='0.64'/><circle cx='293.2' cy='22.6' r='0.77' opacity='0.51'/><circle cx='387.4' cy='339.1' r='0.55' opacity='0.53'/><circle cx='387.7' cy='289.2' r='0.76' opacity='0.57'/><circle cx='383.0' cy='381.5' r='0.65' opacity='0.43'/><circle cx='351.6' cy='139.5' r='0.56' opacity='0.41'/><circle cx='180.0' cy='123.8' r='0.87' opacity='0.56'/><circle cx='306.3' cy='368.7' r='0.52' opacity='0.40'/><circle cx='235.5' cy='213.7' r='0.67' opacity='0.36'/><circle cx='381.8' cy='23.0' r='0.65' opacity='0.44'/><circle cx='279.1' cy='388.2' r='0.71' opacity='0.34'/><circle cx='170.4' cy='119.1' r='0.65' opacity='0.48'/><circle cx='139.7' cy='223.3' r='0.75' opacity='0.38'/><circle cx='380.7' cy='192.3' r='0.85' opacity='0.60'/><circle cx='266.4' cy='216.8' r='0.70' opacity='0.63'/><circle cx='394.6' cy='166.6' r='0.78' opacity='0.39'/><circle cx='246.5' cy='147.2' r='0.63' opacity='0.47'/><circle cx='333.8' cy='368.6' r='0.54' opacity='0.70'/><circle cx='32.6' cy='170.9' r='0.56' opacity='0.29'/><circle cx='418.4' cy='92.4' r='0.75' opacity='0.33'/><circle cx='192.0' cy='249.0' r='0.56' opacity='0.76'/><circle cx='371.5' cy='374.0' r='0.85' opacity='0.75'/><circle cx='319.7' cy='115.7' r='0.50' opacity='0.39'/><circle cx='31.9' cy='0.7' r='0.75' opacity='0.38'/><circle cx='311.3' cy='205.5' r='0.78' opacity='0.38'/><circle cx='370.5' cy='98.8' r='0.65' opacity='0.74'/><circle cx='49.7' cy='205.5' r='0.50' opacity='0.75'/><circle cx='267.5' cy='387.3' r='0.51' opacity='0.75'/><circle cx='79.0' cy='406.9' r='0.73' opacity='0.62'/><circle cx='111.8' cy='93.6' r='0.58' opacity='0.56'/><circle cx='22.0' cy='323.2' r='0.78' opacity='0.64'/></svg>") 0 0 / 420px 420px repeat,
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='760' height='760' fill='%23eeebe3'><circle cx='378.6' cy='24.9' r='0.87' opacity='0.76'/><circle cx='99.4' cy='522.8' r='1.34' opacity='0.27'/><circle cx='671.2' cy='654.6' r='1.40' opacity='0.77'/><circle cx='581.3' cy='318.9' r='0.95' opacity='0.65'/><circle cx='670.5' cy='302.7' r='0.94' opacity='0.47'/><circle cx='674.1' cy='424.7' r='1.01' opacity='0.59'/><circle cx='558.5' cy='254.6' r='1.24' opacity='0.48'/><circle cx='151.0' cy='236.9' r='1.39' opacity='0.80'/><circle cx='480.6' cy='662.9' r='1.35' opacity='0.36'/><circle cx='490.4' cy='102.9' r='1.10' opacity='0.56'/><circle cx='586.3' cy='718.8' r='1.09' opacity='0.35'/><circle cx='339.5' cy='126.2' r='1.20' opacity='0.54'/><circle cx='426.8' cy='385.1' r='1.25' opacity='0.45'/><circle cx='570.7' cy='19.8' r='0.98' opacity='0.55'/><circle cx='154.1' cy='549.4' r='0.97' opacity='0.38'/><circle cx='501.3' cy='326.2' r='0.85' opacity='0.68'/><circle cx='625.4' cy='695.7' r='1.35' opacity='0.62'/><circle cx='728.8' cy='19.2' r='1.26' opacity='0.58'/><circle cx='550.3' cy='682.6' r='0.82' opacity='0.32'/><circle cx='61.0' cy='82.3' r='0.85' opacity='0.26'/><circle cx='459.8' cy='718.8' r='0.92' opacity='0.32'/><circle cx='153.7' cy='512.9' r='0.95' opacity='0.50'/><circle cx='755.4' cy='321.2' r='1.20' opacity='0.68'/><circle cx='301.6' cy='316.5' r='0.84' opacity='0.38'/><circle cx='613.8' cy='740.5' r='0.89' opacity='0.76'/><circle cx='386.6' cy='92.8' r='0.93' opacity='0.58'/></svg>") 137px 71px / 760px 760px repeat,
+    radial-gradient(ellipse 70% 45% at 85% 8%, rgb(255 75 62 / 0.07), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 8% 85%, rgb(120 165 135 / 0.09), transparent 70%),
+    radial-gradient(ellipse 95% 40% at 50% 45%, rgb(238 235 227 / 0.035), transparent 70%);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 2px;
+}
+
+input::placeholder {
+  color: var(--color-muted);
+}
+
+.nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * Page motion. CSS only: app/template.tsx remounts the page on every navigation, so the
+ * entrance replays. Only opacity, transform and filter move. The reduced-motion block at the
+ * bottom removes every animation and transition, leaving the final state.
+ * ------------------------------------------------------------------------- */
+:root {
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --stack-start: 250ms; /* a stack-reveal list draws in this long after the page enters */
+}
+
+/* Block enter: fade, un-blur 6px and rise 6px over 500ms. `enter-N` starts block N 60ms later (lib/motion.ts caps N at 8). */
+@keyframes enter {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    translate: 0 6px;
+  }
+}
+
+/* Same timing, no blur, for the preview cards and any large box. Rise is --enter-rise, 6px by default. */
+@keyframes enter-flat {
+  from {
+    opacity: 0;
+    translate: 0 var(--enter-rise, 6px);
+  }
+}
+
+@utility enter-* {
+  animation: enter 500ms var(--ease-soft) calc(--value(integer) * 60ms) backwards;
+  /* A card icon inside an entering block stamps 200ms after the block's enter ends. */
+  --stamp-delay: calc(--value(integer) * 60ms + 700ms);
+}
+
+@utility enter-flat-* {
+  animation: enter-flat 500ms var(--ease-soft) calc(--value(integer) * 60ms) backwards;
+  --stamp-delay: calc(--value(integer) * 60ms + 700ms);
+}
+
+/*
+ * Lists (the table, the awards): each row's bottom hairline scales in from the left over 600ms,
+ * and 120ms after its line the row's cells slide in 6px from the left over 400ms. Rows are 50ms
+ * apart and set --row; the list sets --stack-start. The row's own border goes clear and a
+ * pseudo-element draws the line in its place, so a row without the class keeps its border.
+ * A row marked data-gap (the dots) slides in but has no line.
+ */
+@keyframes stack-line {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes stack-item {
+  from {
+    opacity: 0;
+    translate: -6px 0;
+  }
+}
+
+@utility stack-reveal {
+  & > * {
+    position: relative;
+    border-bottom-color: transparent;
+  }
+
+  & > *::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 1px;
+    background: var(--color-line);
+    transform-origin: left;
+    animation: stack-line 600ms var(--ease-soft) calc(var(--stack-start) + var(--row) * 50ms) backwards;
+  }
+
+  & > [data-gap]::after {
+    content: none;
+  }
+
+  & > * > * {
+    animation: stack-item 400ms var(--ease-soft) calc(var(--stack-start) + 120ms + var(--row) * 50ms) backwards;
+  }
+}
+
+/* Card arrival, 280ms slide up, and the icon stamp 110ms after a 200ms delay (an entering block sets a later --stamp-delay). */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.arrive {
+  animation: arrive 280ms var(--ease-soft) both;
+}
+
+.stamp {
+  animation: stamp 110ms ease-out var(--stamp-delay, 200ms) both;
+}
+
+/* The progress bar is full width and scales from the left, so no width ever animates. */
+.bar {
+  transform-origin: left;
+  transition: transform 240ms ease-out;
+}
+
+button {
+  transition: scale 120ms;
+}
+
+button:active {
+  scale: 0.98;
+}
+
+input {
+  transition: border-color 150ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

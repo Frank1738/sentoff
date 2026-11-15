@@ -16,7 +16,13 @@ export const IP_WINDOW_SECONDS = 10 * 60;
 export const GLOBAL_BUILD_WINDOW_SECONDS = 60 * 60;
 export const CLAUDE_WINDOW_SECONDS = 24 * 60 * 60;
 
-export const reportKey = (leagueId: number, gameweek: number) => `league:${leagueId}:gw${gameweek}`;
+/**
+ * Bump REPORT_VERSION to throw away every cached report at once, e.g. after a writer fix.
+ * Old keys are ignored and expire on their own within three days.
+ */
+const REPORT_VERSION = 2;
+export const reportKey = (leagueId: number, gameweek: number) =>
+  `league:${leagueId}:gw${gameweek}:v${REPORT_VERSION}`;
 export const lockKey = (leagueId: number) => `lock:league:${leagueId}`;
 export const globalBuildKey = "rate:global:builds";
 export const claudeKey = "rate:global:claude";

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Zilla_Slab } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { siteUrl } from "@/components/site";
 
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${zilla.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-bg font-sans text-text">{children}</body>
+      <GoogleAnalytics gaId="G-VKKG9V8QKW" />
     </html>
   );
 }
